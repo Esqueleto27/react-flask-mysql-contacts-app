@@ -1,23 +1,39 @@
+import psycopg2
+import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import mysql.connector
 
 app = Flask(__name__)
 CORS(app)
 
-db = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="Floresmateo27@",
-    database="contactos_app"
+# conexión a PostgreSQL
+conn = psycopg2.connect(
+    host="dpg-d7gk39q8qa3s738jpuhg-a",
+    database="contacts_db_gy7d",
+    user="contacts_db_gy7d_user",
+    password="XJYxeWtMR3rbRSZr2Ebu3jv5wdR6s1cc",
+    port="5432"
 )
 
-cursor = db.cursor()
+cursor = conn.cursor()
 
+# 🔥 Crear tabla automáticamente
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS contactos (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100),
+    email VARCHAR(100),
+    numero VARCHAR(20)
+)
+""")
+conn.commit()
+
+# 🟢 Ruta base
 @app.route("/")
 def home():
     return "Backend funcionando 🚀"
 
+# 🟢 Guardar datos
 @app.route("/guardar", methods=["POST"])
 def guardar():
     data = request.get_json()
@@ -30,12 +46,13 @@ def guardar():
     valores = (nombre, email, numero)
 
     cursor.execute(sql, valores)
-    db.commit()
+    conn.commit()
 
     return jsonify({
-        "message": "Datos guardados en MySQL"
+        "message": "Datos guardados correctamente"
     }), 200
 
+# 🟢 Obtener contactos
 @app.route("/contactos", methods=["GET"])
 def obtener_contactos():
     cursor.execute("SELECT * FROM contactos")
@@ -52,5 +69,7 @@ def obtener_contactos():
 
     return jsonify(contactos), 200
 
+# 🚀 IMPORTANTE PARA RENDER
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
