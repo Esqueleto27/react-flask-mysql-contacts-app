@@ -1,9 +1,7 @@
 import axios from "axios";
 
-// 🔹 Creamos una instancia de axios
 const api = axios.create({
-  baseURL: "http://localhost:5000",
+  baseURL: "https://react-flask-mysql-contacts-app.onrender.com",
 });
 
-// 🔹 Exportamos para usar en toda la app
 export default api;
